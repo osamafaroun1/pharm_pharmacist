@@ -9,8 +9,8 @@ export interface User {
   landline?: string;
   email?: string;
   role: string;
-  pharmacyName?: string;
-  pharmacyLocation?: string;
+  pharmacyName: string;
+  pharmacyLocation: string;
   pharmacyLocationDetails?: string;
   licenseImage?: string;
 }

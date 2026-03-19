@@ -1054,6 +1054,21 @@ button, a { will-change: opacity, transform; }
 .slide-dot  { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35); border: none; cursor: pointer; padding: 0; transition: all .2s; }
 .slide-dot.active { background: white; width: 20px; border-radius: 4px; }
 
+.error-text {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.upload-btn {
+  width: 100%;
+  padding: 20px;
+  border: 2px dashed var(--bdr);
+  border-radius: var(--r2);
+  background: white;
+  cursor: pointer;
+}
+
+
 /* Mobile */
 @media (max-width: 899px) {
   .slide-title   { font-size: 16px; }
