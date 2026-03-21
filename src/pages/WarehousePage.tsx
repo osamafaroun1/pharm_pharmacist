@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import { refreshBus } from '../components/Layout';
+import { IconArrowLeft, IconHeart, IconBell, IconPill, IconWarehouse, IconPin, IconCart } from '../components/Icons';
 
 interface Category  { id: number; name: string; warehouseId: number; }
 interface Product   { id: number; name: string; scientificName: string; company: string; price: number; stock: number; unit: string; warehouseId: number; categoryId: number; imageUrl: string | null; warehouse: { name: string }; category: { name: string }; }
 interface Warehouse { id: number; name: string; location: string; logo: string | null; }
 
 const PAGE_SIZE = 20;
-const asArray = <T,>(value: unknown): T[] => Array.isArray(value) ? value : [];
 
 export default function WarehousePage() {
   const { id }      = useParams<{ id: string }>();
@@ -39,8 +39,8 @@ export default function WarehousePage() {
       api.get('/favorites/ids'),
     ]).then(([w, c, f]) => {
       setWarehouse(w.data);
-      setCategories(asArray<Category>(c.data));
-      setFavIds(asArray<number>(f.data));
+      setCategories(c.data);
+      setFavIds(f.data);
     }).catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
@@ -71,11 +71,11 @@ export default function WarehousePage() {
       if (selectedCategory) params.categoryId = selectedCategory;
       if (search)           params.search      = search;
       const { data } = await api.get('/products', { params });
-      const productSource = Array.isArray(data) ? data : data?.products;
-      const newProducts = asArray<Product>(productSource);
-      setProducts(prev => reset ? newProducts : [...asArray<Product>(prev), ...newProducts]);
-      setHasMore(Array.isArray(data) ? false : Boolean(data?.hasMore));
-      setTotal(Array.isArray(data) ? newProducts.length : Number(data?.total ?? newProducts.length));
+      // handle both paginated {products,total,hasMore} and plain array
+      const newProducts: any[] = Array.isArray(data) ? data : (data.products || []);
+      setProducts(prev => reset ? newProducts : [...prev, ...newProducts]);
+      setHasMore(Array.isArray(data) ? false : (data.hasMore ?? false));
+      setTotal(Array.isArray(data) ? newProducts.length : (data.total ?? newProducts.length));
     } catch { toast.error('خطأ في تحميل المنتجات'); }
     setLoading(false);
     setLoadingMore(false);
@@ -108,12 +108,12 @@ export default function WarehousePage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
         <button onClick={() => navigate(-1)}
-          style={{ background: 'var(--bg)', border: '1.5px solid var(--bdr)', borderRadius: 'var(--r1)', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, cursor: 'pointer', flexShrink: 0, color: 'var(--tx2)', fontWeight: 700 }}>
-          ←
+          style={{ background: 'var(--bg)', border: '1.5px solid var(--bdr)', borderRadius: 'var(--r1)', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: 'var(--tx2)' }}>
+          <IconArrowLeft size={18} />
         </button>
         {warehouse?.logo
           ? <img src={warehouse.logo} alt={warehouse.name} style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--bdr)', flexShrink: 0 }} />
-          : <div style={{ width: 38, height: 38, borderRadius: 8, background: 'linear-gradient(135deg,var(--pl),var(--pf))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🏭</div>
+          : <div style={{ width: 38, height: 38, borderRadius: 8, background: 'linear-gradient(135deg,var(--pl),var(--pf))', display: 'flex', alignItems: 'center', justifyContent: 'center', color:'var(--p)', flexShrink: 0 }}><IconWarehouse size={20}/></div>
         }
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{warehouse?.name}</div>
@@ -134,7 +134,7 @@ export default function WarehousePage() {
 
       {/* Search */}
       <div className="search-bar" style={{ marginBottom: 14 }}>
-        <input placeholder="🔍 بحث باسم الدواء، الاسم العلمي، الشركة..."
+        <input placeholder="بحث باسم الدواء، الاسم العلمي، الشركة..."
           value={search} onChange={e => setSearch(e.target.value)} />
         {search && <button className="btn-ghost" style={{ padding: '4px 10px', fontSize: 13 }} onClick={() => setSearch('')}>✕</button>}
       </div>
@@ -153,7 +153,7 @@ export default function WarehousePage() {
       {/* Products */}
       {products.length === 0 && !loading ? (
         <div className="empty-state">
-          <div className="empty-icon">📦</div>
+          <div className="empty-icon" style={{color:'var(--tx3)'}}><IconWarehouse size={40}/></div>
           <div className="empty-text">لا توجد منتجات</div>
         </div>
       ) : (
@@ -165,7 +165,7 @@ export default function WarehousePage() {
                   <div className="product-img"
                     onClick={() => p.imageUrl && setModalImg(p.imageUrl)}
                     style={{ cursor: p.imageUrl ? 'zoom-in' : 'default' }}>
-                    {p.imageUrl ? <img src={p.imageUrl} alt={p.name} /> : <span>💊</span>}
+                    {p.imageUrl ? <img src={p.imageUrl} alt={p.name} /> : <span style={{color:'var(--p)'}}><IconPill size={36}/></span>}
                   </div>
                   <div className="product-info">
                     <div className="product-name">{p.name}</div>
@@ -187,13 +187,13 @@ export default function WarehousePage() {
                 <div className="product-footer" style={{ justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button onClick={e => { e.stopPropagation(); toggleFav(p.id); }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}>
-                      {favIds.includes(p.id) ? '❤️' : '🤍'}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: favIds.includes(p.id) ? '#ef4444' : 'var(--tx3)', display: 'flex', alignItems: 'center' }}>
+                      <IconHeart size={16} />
                     </button>
                     {p.stock <= 0 && (
                       <button onClick={() => api.post(`/stock-alerts/${p.id}`, {}).catch(() => {})}
-                        style={{ background: 'var(--pl)', color: 'var(--pd)', border: 'none', borderRadius: 'var(--r1)', padding: '2px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>
-                        🔔 نبّهني
+                        style={{ background: 'var(--pl)', color: 'var(--pd)', border: 'none', borderRadius: 'var(--r1)', padding: '3px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}>
+                        <IconBell size={11} /> نبّهني
                       </button>
                     )}
                   </div>

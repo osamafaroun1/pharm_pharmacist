@@ -1,3 +1,4 @@
+import { IconPill, IconSearch, IconCart } from '../components/Icons';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api';

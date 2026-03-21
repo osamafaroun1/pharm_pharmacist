@@ -1,7 +1,7 @@
 // RegisterForm.tsx
-import { useState, useRef } from 'react'; // ← useNavigate مُضافة
+import { useState, useRef } from 'react';
 import { toast } from 'react-toastify';
-import { useAuthStore, User } from '../store/authStore';
+import { useAuthStore, User } from '../../store/authStore';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 

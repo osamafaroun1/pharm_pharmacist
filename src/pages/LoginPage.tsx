@@ -1,7 +1,8 @@
-// LoginPage.tsx
 import { useState } from 'react';
-import { LoginForm } from '../components/LoginForm';
-import { RegisterForm } from '../components/RegisterForm';
+import { LoginForm } from '../components/Login&&Register/LoginForm';
+import { RegisterForm } from '../components/Login&&Register/RegisterForm';
+import { IconPill_login } from '../components/Icons';
+
 
 export default function LoginPage() {
     const [tab, setTab] = useState<'login' | 'register'>('login');
@@ -11,34 +12,26 @@ export default function LoginPage() {
             <div className="login-card">
                 {/* Logo */}
                 <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                    <div style={{ fontSize: 50, marginBottom: 8 }}>💊</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, color: 'var(--p)' }}>
+                        <IconPill_login size={52} />
+                    </div>
                     <div className="login-logo">نظام الموزع الدوائي</div>
-                    <div className="login-sub">بوابة الصيدلاني 🇸🇾</div>
+                    <div className="login-sub">بوابة الصيدلاني</div>
                 </div>
+
 
                 <div className="card">
                     <div className="auth-tabs" style={{ marginBottom: 24 }}>
-                        <button
-                            className={`auth-tab${tab === 'login' ? ' active' : ''}`}
-                            onClick={() => setTab('login')}
-                        >
-                            تسجيل دخول
-                        </button>
-                        <button
-                            className={`auth-tab${tab === 'register' ? ' active' : ''}`}
-                            onClick={() => setTab('register')}
-                        >
-                            حساب جديد
-                        </button>
+                        <button className={`auth-tab${tab === 'login' ? ' active' : ''}`} onClick={() => setTab('login')}>تسجيل دخول</button>
+                        <button className={`auth-tab${tab === 'register' ? ' active' : ''}`} onClick={() => setTab('register')}>حساب جديد</button>
                     </div>
 
                     {tab === 'login' && <LoginForm />}
                     {tab === 'register' && <RegisterForm />}
+                    <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--tx3)', marginTop: 20 }}>
+                        © 2026 نظام الموزع الدوائي – سوريا
+                    </p>
                 </div>
-
-                <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--tx3)', marginTop: 20 }}>
-                    © 2026 نظام الموزع الدوائي – سوريا
-                </p>
             </div>
         </div>
     );

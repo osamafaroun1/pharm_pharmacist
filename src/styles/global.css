@@ -1068,6 +1068,10 @@ button, a { will-change: opacity, transform; }
   cursor: pointer;
 }
 
+.input-field.error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
 
 /* Mobile */
 @media (max-width: 899px) {

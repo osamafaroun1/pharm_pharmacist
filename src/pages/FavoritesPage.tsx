@@ -1,3 +1,4 @@
+import { IconHeart, IconPill } from '../components/Icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -30,7 +31,7 @@ export default function FavoritesPage() {
   const handleAdd = (p: any) => {
     if (p.stock <= 0) { toast.error('المنتج غير متوفر'); return; }
     addItem({ productId: p.id, name: p.name, price: p.price, quantity: 1, warehouseId: p.warehouseId, warehouseName: p.warehouse?.name || '' });
-    toast.success(`✅ تمت الإضافة: ${p.name}`);
+    toast.success(`تمت الإضافة: ${p.name}`);
   };
 
   const fmt = (n: number) => new Intl.NumberFormat('ar-SY').format(n) + ' ل.س';
@@ -39,7 +40,7 @@ export default function FavoritesPage() {
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">❤️ المفضلة</h1>
+          <h1 className="page-title">المفضلة</h1>
           <div className="page-sub">{products.length} منتج محفوظ</div>
         </div>
       </div>
@@ -48,9 +49,9 @@ export default function FavoritesPage() {
         <div className="loading"><div className="spinner" /></div>
       ) : products.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🤍</div>
+          <div className="empty-icon" style={{color:"var(--tx3)"}}><IconHeart size={40}/></div>
           <div className="empty-text">لا توجد منتجات في المفضلة</div>
-          <div style={{ fontSize: 13, color: 'var(--tx3)', marginTop: 6, marginBottom: 20 }}>اضغط ❤️ على أي منتج لحفظه هنا</div>
+          <div style={{ fontSize: 13, color: 'var(--tx3)', marginTop: 6, marginBottom: 20 }}>اضغط على قلب أي منتج لحفظه هنا</div>
           <button className="btn-green" onClick={() => navigate('/')}>تصفح المنتجات</button>
         </div>
       ) : (
@@ -59,7 +60,7 @@ export default function FavoritesPage() {
             <div key={p.id} className="product-card">
               <div className="product-body">
                 <div className="product-img" onClick={() => p.imageUrl && setModalImg(p.imageUrl)} style={{ cursor: p.imageUrl ? 'zoom-in' : 'default' }}>
-                  {p.imageUrl ? <img src={p.imageUrl} alt={p.name} /> : <span>💊</span>}
+                  {p.imageUrl ? <img src={p.imageUrl} alt={p.name} /> : <span style={{color:'var(--p)'}}><IconPill size={32}/></span>}
                 </div>
                 <div className="product-info">
                   <div className="product-name">{p.name}</div>
@@ -79,7 +80,12 @@ export default function FavoritesPage() {
                 </div>
               </div>
               <div className="product-footer" style={{ justifyContent: 'space-between' }}>
-                <button onClick={() => removeFav(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>❤️</button>
+                <button
+                  onClick={() => removeFav(p.id)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#ef4444' }}
+                >
+                  <IconHeart size={16}/>
+                </button>
                 <span className="product-footer-meta">📂 {p.category?.name} • {p.warehouse?.name}</span>
               </div>
             </div>

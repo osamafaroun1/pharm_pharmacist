@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { IconCart, IconTrash, IconWarehouse } from '../components/Icons';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCartStore } from '../store/cartStore';
@@ -7,8 +8,26 @@ import api from '../services/api';
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, clearCart, total } = useCartStore();
-  const [notes, setNotes]     = useState('');
-  const [loading, setLoading] = useState(false);
+  const [notes,    setNotes]    = useState('');
+  const [loading,  setLoading]  = useState(false);
+  const [offers,   setOffers]   = useState<any[]>([]);
+
+  const orderTotal = total();
+
+  // جلب العروض النشطة ذات الحد الأدنى
+  useEffect(() => {
+    api.get('/announcements?active=true')
+      .then(r => setOffers(r.data.filter((a: any) => a.minOrderAmount && a.minOrderAmount > 0)))
+      .catch(() => {});
+  }, []);
+
+  // العروض التي يستحقها الطلب الحالي
+  const eligibleOffers = offers.filter(o => orderTotal >= parseFloat(o.minOrderAmount));
+  // العروض التي تقترب منها (أقل من 20% من الحد)
+  const nearOffers = offers.filter(o => {
+    const min = parseFloat(o.minOrderAmount);
+    return orderTotal < min && orderTotal >= min * 0.8;
+  });
 
   const fmt = (n: number) => new Intl.NumberFormat('ar-SY').format(n) + ' ل.س';
 
@@ -31,7 +50,7 @@ export default function CartPage() {
         });
       }
       clearCart();
-      toast.success('✅ تم إرسال طلبك بنجاح!');
+      toast.success('تم إرسال طلبك بنجاح!');
       navigate('/orders');
     } catch (err: any) { toast.error(err.response?.data?.message || 'خطأ في الإرسال'); }
     setLoading(false);
@@ -41,17 +60,17 @@ export default function CartPage() {
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">🛒 سلة المشتريات</h1>
+          <h1 className="page-title"><IconCart size={18} /> سلة المشتريات</h1>
           <div className="page-sub">{items.length} منتج في السلة</div>
         </div>
         {items.length > 0 && (
-          <button className="btn-danger-soft" onClick={() => clearCart()}>🗑 تفريغ السلة</button>
+          <button className="btn-danger-soft" onClick={() => clearCart()}><IconTrash size={15} /> تفريغ السلة</button>
         )}
       </div>
 
       {items.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🛒</div>
+          <div className="empty-icon" style={{color:"var(--p)"}}><IconCart size={40} /></div>
           <div className="empty-text">السلة فارغة</div>
           <div style={{ marginTop: 6, fontSize: 13, color: 'var(--tx3)', marginBottom: 20 }}>أضف منتجات من الصفحة الرئيسية</div>
           <button className="btn-green" onClick={() => navigate('/')}>تصفح المنتجات</button>
@@ -62,7 +81,7 @@ export default function CartPage() {
           <div>
             {Object.entries(warehouseGroups).map(([wId, group]: any) => (
               <div key={wId} style={{ marginBottom: 24 }}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--p)', marginBottom: 12 }}>🏭 {group.name}</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--p)', marginBottom: 12 }}></div>
                 <div style={{ display: 'grid', gap: 12 }}>
                   {group.items.map((item: any) => (
                     <div key={item.productId} className="card" style={{ padding: '14px 16px' }}>
@@ -101,6 +120,43 @@ export default function CartPage() {
                 style={{ resize: 'none' }}
               />
             </div>
+
+            {/* ── بانر العروض المستحقة ── */}
+            {eligibleOffers.length > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                {eligibleOffers.map(offer => (
+                  <div key={offer.id} style={{ background: 'linear-gradient(135deg, #14532d, #166534)', borderRadius: 'var(--r2)', padding: '14px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: 28, flexShrink: 0 }}>🎁</span>
+                    <div>
+                      <div style={{ color: '#86efac', fontWeight: 800, fontSize: 14, marginBottom: 3 }}>تهانينا! طلبك يستحق عرضاً</div>
+                      <div style={{ color: 'white', fontWeight: 700, fontSize: 13 }}>{offer.title}</div>
+                      {offer.subtitle && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, marginTop: 2 }}>{offer.subtitle}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── تنبيه اقتراب من عرض ── */}
+            {nearOffers.length > 0 && eligibleOffers.length === 0 && (
+              <div style={{ marginBottom: 14 }}>
+                {nearOffers.map(offer => {
+                  const min = parseFloat(offer.minOrderAmount);
+                  const remaining = min - orderTotal;
+                  return (
+                    <div key={offer.id} style={{ background: '#fefce8', border: '1.5px solid #fde047', borderRadius: 'var(--r2)', padding: '12px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
+                      <div>
+                        <div style={{ color: '#854d0e', fontWeight: 800, fontSize: 13, marginBottom: 2 }}>أنت قريب من عرض!</div>
+                        <div style={{ color: '#713f12', fontSize: 12 }}>
+                          أضف <strong>{new Intl.NumberFormat('ar-SY').format(remaining)} ل.س</strong> لطلبك للحصول على: {offer.title}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="cart-total" style={{ marginBottom: 16 }}>
               <div style={{ textAlign: 'left' }}>

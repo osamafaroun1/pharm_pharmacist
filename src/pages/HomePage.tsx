@@ -1,3 +1,4 @@
+import { IconSearch, IconWarehouse, IconPin } from '../components/Icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -44,7 +45,7 @@ export default function HomePage() {
       {/* ── Header ── */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">🏠 الرئيسية</h1>
+          <h1 className="page-title">الرئيسية</h1>
           <div className="page-sub">مرحباً {user?.pharmacyName} — اختر شركة للتصفح</div>
         </div>
       </div>
@@ -55,7 +56,7 @@ export default function HomePage() {
       {/* ── Search ── */}
       <div className="search-bar" style={{ marginBottom: 24 }}>
         <input
-          placeholder="🔍 ابحث عن شركة  ..."
+          placeholder="ابحث عن شركة أو مستودع..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -74,7 +75,7 @@ export default function HomePage() {
         <div className="loading"><div className="spinner" /></div>
       ) : filtered.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🏭</div>
+          <div className="empty-icon" style={{color:"var(--tx3)"}}><IconWarehouse size={40}/></div>
           <div className="empty-text">لا توجد نتائج</div>
         </div>
       ) : (
@@ -90,14 +91,14 @@ export default function HomePage() {
                 {w.logo ? (
                   <img src={w.logo} alt={w.name} />
                 ) : (
-                  <span className="warehouse-card-logo-placeholder">🏭</span>
+                  <span className="warehouse-card-logo-placeholder" style={{color:'var(--p)'}}><IconWarehouse size={28}/></span>
                 )}
               </div>
 
               {/* Info */}
               <div className="warehouse-card-body">
                 <div className="warehouse-card-name">{w.name}</div>
-                <div className="warehouse-card-loc">📍 {w.location}</div>
+                <div className="warehouse-card-loc" style={{display:"flex",alignItems:"center",gap:4}}><IconPin size={12}/> {w.location}</div>
                 {w.description && (
                   <div className="warehouse-card-desc">{w.description}</div>
                 )}

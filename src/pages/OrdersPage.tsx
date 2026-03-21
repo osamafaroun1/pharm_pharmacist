@@ -1,3 +1,4 @@
+import { IconOrders, IconCheck, IconTruck, IconBell, IconX, IconRefresh } from '../components/Icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -6,18 +7,18 @@ import { toast } from 'react-toastify';
 import { useCartStore } from '../store/cartStore';
 
 const STEPS = [
-  { key: 'pending',    label: 'استلام',  icon: '📥' },
-  { key: 'confirmed',  label: 'تأكيد',   icon: '✅' },
-  { key: 'delivering', label: 'توصيل',   icon: '🚚' },
-  { key: 'delivered',  label: 'تسليم',   icon: '🎉' },
+  { key: 'pending',    label: 'استلام',  Icon: IconBell },
+  { key: 'confirmed',  label: 'تأكيد',   Icon: IconCheck },
+  { key: 'delivering', label: 'توصيل',   Icon: IconTruck },
+  { key: 'delivered',  label: 'تسليم',   Icon: IconCheck },
 ];
 
 const statusMap: any = {
-  pending:    { label: 'بانتظار التأكيد', cls: 'badge-pending',    icon: '⏳' },
-  confirmed:  { label: 'تم التأكيد',      cls: 'badge-confirmed',  icon: '✅' },
-  delivering: { label: 'جاري التوصيل',    cls: 'badge-delivering', icon: '🚚' },
-  delivered:  { label: 'تم التسليم',      cls: 'badge-delivered',  icon: '🎉' },
-  cancelled:  { label: 'ملغي',            cls: 'badge-cancelled',  icon: '❌' },
+  pending:    { label: 'بانتظار التأكيد', cls: 'badge-pending',    icon: '●' },
+  confirmed:  { label: 'تم التأكيد',      cls: 'badge-confirmed',  icon: '●' },
+  delivering: { label: 'جاري التوصيل',    cls: 'badge-delivering', icon: '●' },
+  delivered:  { label: 'تم التسليم',      cls: 'badge-delivered',  icon: '●' },
+  cancelled:  { label: 'ملغي',            cls: 'badge-cancelled',  icon: '●' },
 };
 
 function OrderTracker({ status }: { status: string }) {
@@ -43,7 +44,7 @@ function OrderTracker({ status }: { status: string }) {
                 fontSize: 16, border: current ? '3px solid var(--pd)' : '3px solid transparent',
                 transition: 'all .3s', boxShadow: current ? '0 0 0 4px var(--pl)' : 'none',
               }}>
-                {done ? <span style={{ fontSize: 16 }}>{step.icon}</span> : <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{i + 1}</span>}
+                {done ? <span style={{ display:'flex',alignItems:'center',justifyContent:'center' }}><step.Icon size={14}/></span> : <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{i + 1}</span>}
               </div>
               <span style={{ fontSize: 11, fontWeight: current ? 800 : 500, color: done ? 'var(--p)' : 'var(--tx3)', whiteSpace: 'nowrap' }}>{step.label}</span>
             </div>
@@ -96,7 +97,7 @@ export default function OrdersPage() {
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">📋 طلباتي</h1>
+          <h1 className="page-title">طلباتي</h1>
           <div className="page-sub">{orders.length} طلب إجمالاً</div>
         </div>
       </div>
@@ -144,7 +145,7 @@ export default function OrdersPage() {
                 <div className="order-footer">
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-ghost" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => setSelected(order)}>التفاصيل</button>
-                    <button className="btn-green" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => handleReorder(order)}>🔄 إعادة الطلب</button>
+                    <button className="btn-green" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => handleReorder(order)}><IconRefresh size={13}/> إعادة الطلب</button>
                   </div>
                   <div style={{ fontWeight: 800, color: 'var(--p)', fontSize: 15 }}>{fmt(order.totalAmount)}</div>
                 </div>
