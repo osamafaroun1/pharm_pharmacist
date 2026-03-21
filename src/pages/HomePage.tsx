@@ -55,7 +55,7 @@ export default function HomePage() {
       {/* ── Search ── */}
       <div className="search-bar" style={{ marginBottom: 24 }}>
         <input
-          placeholder="🔍 ابحث عن شركة أو مستودع..."
+          placeholder="🔍 ابحث عن شركة  ..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
