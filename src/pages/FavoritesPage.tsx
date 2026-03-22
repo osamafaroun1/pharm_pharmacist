@@ -29,7 +29,6 @@ export default function FavoritesPage() {
     };
 
     const handleAdd = (p: any) => {
-        if (p.stock <= 0) { toast.error('المنتج غير متوفر'); return; }
         addItem({ productId: p.id, name: p.name, price: p.price, quantity: 1, warehouseId: p.warehouseId, warehouseName: p.warehouse?.name || '' });
         toast.success(`تمت الإضافة: ${p.name}`);
     };
@@ -69,12 +68,12 @@ export default function FavoritesPage() {
                                     <div className="product-bottom">
                                         <div className="product-price-col">
                                             <span className="product-price">{fmt(p.price)}</span>
-                                            <span className={p.stock > 0 ? 'product-stock-ok' : 'product-stock-out'}>
-                                                {p.stock > 0 ? `✓ متوفر (${p.stock})` : '✗ نفد'}
+                                            <span className={'product-stock-ok'}>
+                                                {`✓ متوفر`}
                                             </span>
                                         </div>
-                                        <button className="product-add-btn" onClick={() => handleAdd(p)} disabled={p.stock <= 0}>
-                                            {p.stock > 0 ? '+ سلة' : 'نفد'}
+                                        <button className="product-add-btn" onClick={() => handleAdd(p)} >
+                                            {`+ سلة`}
                                         </button>
                                     </div>
                                 </div>
