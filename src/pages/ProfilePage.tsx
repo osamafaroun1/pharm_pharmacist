@@ -57,7 +57,6 @@ export default function ProfilePage() {
         passwordConfirm: '',
     });
 
-    // التحقق الفوري عند تغيير الحقول
     useEffect(() => {
         validateCurrentTab();
     }, [form, tab]);
@@ -110,7 +109,7 @@ export default function ProfilePage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        
+
         if (file.size > 5 * 1024 * 1024) {
             toast.error('حجم الملف يجب أن لا يتجاوز 5 ميغابايت');
             return;
@@ -119,13 +118,13 @@ export default function ProfilePage() {
             toast.error('يرجى رفع صورة أو PDF فقط');
             return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = () => {
-            setForm(prev => ({ 
-                ...prev, 
-                licenseImage: reader.result as string, 
-                licenseFileName: file.name 
+            setForm(prev => ({
+                ...prev,
+                licenseImage: reader.result as string,
+                licenseFileName: file.name
             }));
         };
         reader.readAsDataURL(file);
@@ -133,9 +132,9 @@ export default function ProfilePage() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         validateCurrentTab();
-        
+
         if (Object.keys(errors).length > 0) {
             toast.error('يرجى تصحيح الأخطاء الموجودة');
             return;
@@ -146,11 +145,25 @@ export default function ProfilePage() {
             const { licenseFileName, passwordConfirm, ...payload } = form;
             if (!payload.password) delete (payload as any).password;
             if (!payload.licenseImage && user?.licenseImage) delete (payload as any).licenseImage;
-            
+
             await updateProfile(payload);
             toast.success('تم تحديث البيانات بنجاح');
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'خطأ في التحديث');
+            setForm({
+                firstName: user?.firstName || '',
+                lastName: user?.lastName || '',
+                phone: user?.phone || '',
+                landline: user?.landline || '',
+                email: user?.email || '',
+                pharmacyName: user?.pharmacyName || '',
+                pharmacyLocation: user?.pharmacyLocation || '',
+                pharmacyLocationDetails: user?.pharmacyLocationDetails || '',
+                licenseImage: user?.licenseImage || '',
+                licenseFileName: user?.licenseImage ? 'الشهادة المحفوظة' : '',
+                password: '',
+                passwordConfirm: '',
+            })
         }
         setLoading(false);
     };
@@ -168,27 +181,27 @@ export default function ProfilePage() {
 
             <form onSubmit={handleSave}>
                 {tab === 'info' && (
-                    <PersonalInfoSection 
-                        form={form} 
-                        setForm={setForm} 
-                        getFieldError={getFieldError} 
+                    <PersonalInfoSection
+                        form={form}
+                        setForm={setForm}
+                        getFieldError={getFieldError}
                     />
                 )}
 
                 {tab === 'pharmacy' && (
-                    <PharmacySection 
-                        form={form} 
-                        setForm={setForm} 
-                        getFieldError={getFieldError} 
-                        handleFileChange={handleFileChange} 
+                    <PharmacySection
+                        form={form}
+                        setForm={setForm}
+                        getFieldError={getFieldError}
+                        handleFileChange={handleFileChange}
                     />
                 )}
 
                 {tab === 'security' && (
-                    <SecuritySection 
-                        form={form} 
-                        setForm={setForm} 
-                        getFieldError={getFieldError} 
+                    <SecuritySection
+                        form={form}
+                        setForm={setForm}
+                        getFieldError={getFieldError}
                     />
                 )}
 

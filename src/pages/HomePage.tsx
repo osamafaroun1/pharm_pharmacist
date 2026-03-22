@@ -14,11 +14,11 @@ interface Warehouse {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user }  = useAuthStore();
+  const { user } = useAuthStore();
 
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
-  const [search,     setSearch]     = useState('');
-  const [loading,    setLoading]    = useState(true);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchWarehouses(); }, []);
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function HomePage() {
       {/* ── Search ── */}
       <div className="search-bar" style={{ marginBottom: 24 }}>
         <input
-          placeholder="ابحث عن شركة أو مستودع..."
+          placeholder="ابحث عن شركة..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -67,7 +67,7 @@ export default function HomePage() {
 
       {/* ── Count ── */}
       <div style={{ fontSize: 13, color: 'var(--tx2)', fontWeight: 600, marginBottom: 16 }}>
-        {loading ? '...' : `${filtered.length} شركة / مستودع`}
+        {loading ? '...' : `${filtered.length} شركة`}
       </div>
 
       {/* ── Warehouse cards ── */}
@@ -75,7 +75,7 @@ export default function HomePage() {
         <div className="loading"><div className="spinner" /></div>
       ) : filtered.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon" style={{color:"var(--tx3)"}}><IconWarehouse size={40}/></div>
+          <div className="empty-icon" style={{ color: "var(--tx3)" }}><IconWarehouse size={40} /></div>
           <div className="empty-text">لا توجد نتائج</div>
         </div>
       ) : (
@@ -91,14 +91,14 @@ export default function HomePage() {
                 {w.logo ? (
                   <img src={w.logo} alt={w.name} />
                 ) : (
-                  <span className="warehouse-card-logo-placeholder" style={{color:'var(--p)'}}><IconWarehouse size={28}/></span>
+                  <span className="warehouse-card-logo-placeholder" style={{ color: 'var(--p)' }}><IconWarehouse size={28} /></span>
                 )}
               </div>
 
               {/* Info */}
               <div className="warehouse-card-body">
                 <div className="warehouse-card-name">{w.name}</div>
-                <div className="warehouse-card-loc" style={{display:"flex",alignItems:"center",gap:4}}><IconPin size={12}/> {w.location}</div>
+                <div className="warehouse-card-loc" style={{ display: "flex", alignItems: "center", gap: 4 }}><IconPin size={12} /> {w.location}</div>
                 {w.description && (
                   <div className="warehouse-card-desc">{w.description}</div>
                 )}

@@ -5,8 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import QrScanner      from './QrScanner';
 import QrResultModal  from './QrResultModal';
 import PullToRefresh  from './PullToRefresh';
-import { IconHome, IconOrders, IconHeart, IconCart, IconUser, IconBarcode, IconLogout } from './Icons';
-
+import { IconHome, IconOrders, IconHeart, IconCart, IconUser, IconBarcode, IconLogout, IconPill } from './Icons';
 const NAV = [
   { path: '/',          label: 'الرئيسية', Icon: IconHome,   isCart: false },
   { path: '/orders',    label: 'طلباتي',   Icon: IconOrders, isCart: false },
@@ -125,5 +124,3 @@ export default function PharmacistLayout({ children }: { children: React.ReactNo
   );
 }
 
-// import مؤجل لمنع circular
-import { IconPill } from './Icons';

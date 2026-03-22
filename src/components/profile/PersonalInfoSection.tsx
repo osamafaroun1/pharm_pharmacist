@@ -11,19 +11,19 @@ export default function PersonalInfoSection({ form, setForm, getFieldError }: Pr
             <div className="input-row" style={{ marginBottom: 14 }}>
                 <div>
                     <label className="input-label">الاسم الأول</label>
-                    <input 
+                    <input
                         className={`input-field ${getFieldError('firstName') ? 'error' : ''}`}
-                        value={form.firstName} 
-                        onChange={e => setForm({ ...form, firstName: e.target.value })} 
+                        value={form.firstName}
+                        onChange={e => setForm({ ...form, firstName: e.target.value })}
                     />
                     {getFieldError('firstName') && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>{getFieldError('firstName')}</div>}
                 </div>
                 <div>
                     <label className="input-label">الاسم الأخير</label>
-                    <input 
+                    <input
                         className={`input-field ${getFieldError('lastName') ? 'error' : ''}`}
-                        value={form.lastName} 
-                        onChange={e => setForm({ ...form, lastName: e.target.value })} 
+                        value={form.lastName}
+                        onChange={e => setForm({ ...form, lastName: e.target.value })}
                     />
                     {getFieldError('lastName') && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>{getFieldError('lastName')}</div>}
                 </div>
@@ -31,31 +31,31 @@ export default function PersonalInfoSection({ form, setForm, getFieldError }: Pr
             <div className="input-row" style={{ marginBottom: 14 }}>
                 <div>
                     <label className="input-label">رقم الموبايل</label>
-                    <input 
+                    <input
                         className={`input-field ${getFieldError('phone') ? 'error' : ''}`}
-                        value={form.phone} 
-                        onChange={e => setForm({ ...form, phone: e.target.value })} 
+                        value={form.phone}
+                        onChange={e => setForm({ ...form, phone: e.target.value })}
                     />
                     {getFieldError('phone') && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>{getFieldError('phone')}</div>}
                 </div>
                 <div>
                     <label className="input-label">هاتف ثابت</label>
-                    <input 
+                    <input
                         className={`input-field ${getFieldError('landline') ? 'error' : ''}`}
-                        placeholder="011-xxxxxxx" 
-                        value={form.landline} 
-                        onChange={e => setForm({ ...form, landline: e.target.value })} 
+                        placeholder="011-xxxxxxx"
+                        value={form.landline}
+                        onChange={e => setForm({ ...form, landline: e.target.value })}
                     />
                     {getFieldError('landline') && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>{getFieldError('landline')}</div>}
                 </div>
             </div>
             <div className="input-wrap">
                 <label className="input-label">البريد الإلكتروني</label>
-                <input 
+                <input
                     className={`input-field ${getFieldError('email') ? 'error' : ''}`}
-                    type="email" 
-                    value={form.email} 
-                    onChange={e => setForm({ ...form, email: e.target.value })} 
+                    type="email"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
                 />
                 {getFieldError('email') && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>{getFieldError('email')}</div>}
             </div>

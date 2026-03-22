@@ -39,7 +39,7 @@ function App() {
       </Routes>
       <ToastContainer
         position="top-center"
-        autoClose={3000}
+        autoClose={2500}
         rtl={true}
         toastStyle={{ fontFamily: 'Cairo, sans-serif', fontSize: 14 }}
       />
