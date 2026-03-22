@@ -1,4 +1,4 @@
-import { IconCart, IconTrash, IconWarehouse } from '../components/Icons';
+import { IconCart, IconTrash } from '../components/Icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -6,175 +6,175 @@ import { useCartStore } from '../store/cartStore';
 import api from '../services/api';
 
 export default function CartPage() {
-  const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, clearCart, total } = useCartStore();
-  const [notes,    setNotes]    = useState('');
-  const [loading,  setLoading]  = useState(false);
-  const [offers,   setOffers]   = useState<any[]>([]);
+    const navigate = useNavigate();
+    const { items, updateQuantity, removeItem, clearCart, total } = useCartStore();
+    const [notes, setNotes] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [offers, setOffers] = useState<any[]>([]);
 
-  const orderTotal = total();
+    const orderTotal = total();
 
-  // جلب العروض النشطة ذات الحد الأدنى
-  useEffect(() => {
-    api.get('/announcements?active=true')
-      .then(r => setOffers(r.data.filter((a: any) => a.minOrderAmount && a.minOrderAmount > 0)))
-      .catch(() => {});
-  }, []);
+    // جلب العروض النشطة ذات الحد الأدنى
+    useEffect(() => {
+        api.get('/announcements?active=true')
+            .then(r => setOffers(r.data.filter((a: any) => a.minOrderAmount && a.minOrderAmount > 0)))
+            .catch(() => { });
+    }, []);
 
-  // العروض التي يستحقها الطلب الحالي
-  const eligibleOffers = offers.filter(o => orderTotal >= parseFloat(o.minOrderAmount));
-  // العروض التي تقترب منها (أقل من 20% من الحد)
-  const nearOffers = offers.filter(o => {
-    const min = parseFloat(o.minOrderAmount);
-    return orderTotal < min && orderTotal >= min * 0.8;
-  });
+    // العروض التي يستحقها الطلب الحالي
+    const eligibleOffers = offers.filter(o => orderTotal >= parseFloat(o.minOrderAmount));
+    // العروض التي تقترب منها (أقل من 20% من الحد)
+    const nearOffers = offers.filter(o => {
+        const min = parseFloat(o.minOrderAmount);
+        return orderTotal < min && orderTotal >= min * 0.8;
+    });
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-SY').format(n) + ' ل.س';
+    const fmt = (n: number) => new Intl.NumberFormat('ar-SY').format(n) + ' ل.س';
 
-  const warehouseGroups = items.reduce((acc: any, item) => {
-    if (!acc[item.warehouseId]) acc[item.warehouseId] = { name: item.warehouseName, items: [] };
-    acc[item.warehouseId].items.push(item);
-    return acc;
-  }, {});
+    const warehouseGroups = items.reduce((acc: any, item) => {
+        if (!acc[item.warehouseId]) acc[item.warehouseId] = { name: item.warehouseName, items: [] };
+        acc[item.warehouseId].items.push(item);
+        return acc;
+    }, {});
 
-  const handleOrder = async () => {
-    if (items.length === 0) { toast.error('السلة فارغة'); return; }
-    setLoading(true);
-    try {
-      for (const wId of Object.keys(warehouseGroups)) {
-        const g = warehouseGroups[wId];
-        await api.post('/orders', {
-          warehouseId: parseInt(wId),
-          items: g.items.map((i: any) => ({ productId: i.productId, quantity: i.quantity })),
-          notes,
-        });
-      }
-      clearCart();
-      toast.success('تم إرسال طلبك بنجاح!');
-      navigate('/orders');
-    } catch (err: any) { toast.error(err.response?.data?.message || 'خطأ في الإرسال'); }
-    setLoading(false);
-  };
+    const handleOrder = async () => {
+        if (items.length === 0) { toast.error('السلة فارغة'); return; }
+        setLoading(true);
+        try {
+            for (const wId of Object.keys(warehouseGroups)) {
+                const g = warehouseGroups[wId];
+                await api.post('/orders', {
+                    warehouseId: parseInt(wId),
+                    items: g.items.map((i: any) => ({ productId: i.productId, quantity: i.quantity })),
+                    notes,
+                });
+            }
+            clearCart();
+            toast.success('تم إرسال طلبك بنجاح!');
+            navigate('/orders');
+        } catch (err: any) { toast.error(err.response?.data?.message || 'خطأ في الإرسال'); }
+        setLoading(false);
+    };
 
-  return (
-    <>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title"><IconCart size={18} /> سلة المشتريات</h1>
-          <div className="page-sub">{items.length} منتج في السلة</div>
-        </div>
-        {items.length > 0 && (
-          <button className="btn-danger-soft" onClick={() => clearCart()}><IconTrash size={15} /> تفريغ السلة</button>
-        )}
-      </div>
-
-      {items.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon" style={{color:"var(--p)"}}><IconCart size={40} /></div>
-          <div className="empty-text">السلة فارغة</div>
-          <div style={{ marginTop: 6, fontSize: 13, color: 'var(--tx3)', marginBottom: 20 }}>أضف منتجات من الصفحة الرئيسية</div>
-          <button className="btn-green" onClick={() => navigate('/')}>تصفح المنتجات</button>
-        </div>
-      ) : (
-        <div className="dash-grid">
-          {/* Items */}
-          <div>
-            {Object.entries(warehouseGroups).map(([wId, group]: any) => (
-              <div key={wId} style={{ marginBottom: 24 }}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--p)', marginBottom: 12 }}></div>
-                <div style={{ display: 'grid', gap: 12 }}>
-                  {group.items.map((item: any) => (
-                    <div key={item.productId} className="card" style={{ padding: '14px 16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <button className="btn-danger-soft" onClick={() => removeItem(item.productId)}>حذف</button>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.name}</div>
-                          <div style={{ color: 'var(--tx2)', fontSize: 13 }}>{fmt(item.price)} / وحدة</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-                        <div style={{ fontWeight: 700, color: 'var(--p)', fontSize: 16 }}>{fmt(item.price * item.quantity)}</div>
-                        <div className="qty-row">
-                          <button className="qty-btn" style={{ color: 'var(--p)' }} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>+</button>
-                          <span className="qty-val">{item.quantity}</span>
-                          <button className="qty-btn" style={{ color: 'var(--red)' }} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>−</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+    return (
+        <>
+            <div className="page-header">
+                <div>
+                    <h1 className="page-title"><IconCart size={18} /> سلة المشتريات</h1>
+                    <div className="page-sub">{items.length} منتج في السلة</div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Summary */}
-          <div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-title" style={{ marginBottom: 16 }}>ملاحظات الطلب</div>
-              <textarea
-                className="input-field"
-                rows={4}
-                placeholder="أي ملاحظات إضافية للأدمن..."
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                style={{ resize: 'none' }}
-              />
+                {items.length > 0 && (
+                    <button className="btn-danger-soft" onClick={() => clearCart()}><IconTrash size={15} /> تفريغ السلة</button>
+                )}
             </div>
 
-            {/* ── بانر العروض المستحقة ── */}
-            {eligibleOffers.length > 0 && (
-              <div style={{ marginBottom: 14 }}>
-                {eligibleOffers.map(offer => (
-                  <div key={offer.id} style={{ background: 'linear-gradient(135deg, #14532d, #166534)', borderRadius: 'var(--r2)', padding: '14px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: 28, flexShrink: 0 }}>🎁</span>
+            {items.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-icon" style={{ color: "var(--p)" }}><IconCart size={40} /></div>
+                    <div className="empty-text">السلة فارغة</div>
+                    <div style={{ marginTop: 6, fontSize: 13, color: 'var(--tx3)', marginBottom: 20 }}>أضف منتجات من الصفحة الرئيسية</div>
+                    <button className="btn-green" onClick={() => navigate('/')}>تصفح المنتجات</button>
+                </div>
+            ) : (
+                <div className="dash-grid">
+                    {/* Items */}
                     <div>
-                      <div style={{ color: '#86efac', fontWeight: 800, fontSize: 14, marginBottom: 3 }}>تهانينا! طلبك يستحق عرضاً</div>
-                      <div style={{ color: 'white', fontWeight: 700, fontSize: 13 }}>{offer.title}</div>
-                      {offer.subtitle && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, marginTop: 2 }}>{offer.subtitle}</div>}
+                        {Object.entries(warehouseGroups).map(([wId, group]: any) => (
+                            <div key={wId} style={{ marginBottom: 24 }}>
+                                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--p)', marginBottom: 12 }}></div>
+                                <div style={{ display: 'grid', gap: 12 }}>
+                                    {group.items.map((item: any) => (
+                                        <div key={item.productId} className="card" style={{ padding: '14px 16px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <button className="btn-danger-soft" onClick={() => removeItem(item.productId)}>حذف</button>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.name}</div>
+                                                    <div style={{ color: 'var(--tx2)', fontSize: 13 }}>{fmt(item.price)} / وحدة</div>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                                                <div style={{ fontWeight: 700, color: 'var(--p)', fontSize: 16 }}>{fmt(item.price * item.quantity)}</div>
+                                                <div className="qty-row">
+                                                    <button className="qty-btn" style={{ color: 'var(--p)' }} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>+</button>
+                                                    <span className="qty-val">{item.quantity}</span>
+                                                    <button className="qty-btn" style={{ color: 'var(--red)' }} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>−</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
-            {/* ── تنبيه اقتراب من عرض ── */}
-            {nearOffers.length > 0 && eligibleOffers.length === 0 && (
-              <div style={{ marginBottom: 14 }}>
-                {nearOffers.map(offer => {
-                  const min = parseFloat(offer.minOrderAmount);
-                  const remaining = min - orderTotal;
-                  return (
-                    <div key={offer.id} style={{ background: '#fefce8', border: '1.5px solid #fde047', borderRadius: 'var(--r2)', padding: '12px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
-                      <div>
-                        <div style={{ color: '#854d0e', fontWeight: 800, fontSize: 13, marginBottom: 2 }}>أنت قريب من عرض!</div>
-                        <div style={{ color: '#713f12', fontSize: 12 }}>
-                          أضف <strong>{new Intl.NumberFormat('ar-SY').format(remaining)} ل.س</strong> لطلبك للحصول على: {offer.title}
+                    {/* Summary */}
+                    <div>
+                        <div className="card" style={{ marginBottom: 16 }}>
+                            <div className="card-title" style={{ marginBottom: 16 }}>ملاحظات الطلب</div>
+                            <textarea
+                                className="input-field"
+                                rows={4}
+                                placeholder="أي ملاحظات إضافية للأدمن..."
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                                style={{ resize: 'none' }}
+                            />
                         </div>
-                      </div>
+
+                        {/* ── بانر العروض المستحقة ── */}
+                        {eligibleOffers.length > 0 && (
+                            <div style={{ marginBottom: 14 }}>
+                                {eligibleOffers.map(offer => (
+                                    <div key={offer.id} style={{ background: 'linear-gradient(135deg, #14532d, #166534)', borderRadius: 'var(--r2)', padding: '14px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                        <span style={{ fontSize: 28, flexShrink: 0 }}>🎁</span>
+                                        <div>
+                                            <div style={{ color: '#86efac', fontWeight: 800, fontSize: 14, marginBottom: 3 }}>تهانينا! طلبك يستحق عرضاً</div>
+                                            <div style={{ color: 'white', fontWeight: 700, fontSize: 13 }}>{offer.title}</div>
+                                            {offer.subtitle && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, marginTop: 2 }}>{offer.subtitle}</div>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* ── تنبيه اقتراب من عرض ── */}
+                        {nearOffers.length > 0 && eligibleOffers.length === 0 && (
+                            <div style={{ marginBottom: 14 }}>
+                                {nearOffers.map(offer => {
+                                    const min = parseFloat(offer.minOrderAmount);
+                                    const remaining = min - orderTotal;
+                                    return (
+                                        <div key={offer.id} style={{ background: '#fefce8', border: '1.5px solid #fde047', borderRadius: 'var(--r2)', padding: '12px 16px', marginBottom: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                            <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
+                                            <div>
+                                                <div style={{ color: '#854d0e', fontWeight: 800, fontSize: 13, marginBottom: 2 }}>أنت قريب من عرض!</div>
+                                                <div style={{ color: '#713f12', fontSize: 12 }}>
+                                                    أضف <strong>{new Intl.NumberFormat('ar-SY').format(remaining)} ل.س</strong> لطلبك للحصول على: {offer.title}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        <div className="cart-total" style={{ marginBottom: 16 }}>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ opacity: .65, fontSize: 12 }}>الدفع يدوياً مع المندوب</div>
+                                <div style={{ fontSize: 22, fontWeight: 900 }}>{fmt(total())}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ opacity: .65, fontSize: 13 }}>المجموع الكلي</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>{items.length} منتج</div>
+                            </div>
+                        </div>
+
+                        <button className="btn-primary" onClick={handleOrder} disabled={loading}>
+                            {loading ? 'جاري الإرسال...' : '✅ تأكيد الطلب وإرساله'}
+                        </button>
                     </div>
-                  );
-                })}
-              </div>
+                </div>
             )}
-
-            <div className="cart-total" style={{ marginBottom: 16 }}>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ opacity: .65, fontSize: 12 }}>الدفع يدوياً مع المندوب</div>
-                <div style={{ fontSize: 22, fontWeight: 900 }}>{fmt(total())}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ opacity: .65, fontSize: 13 }}>المجموع الكلي</div>
-                <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>{items.length} منتج</div>
-              </div>
-            </div>
-
-            <button className="btn-primary" onClick={handleOrder} disabled={loading}>
-              {loading ? 'جاري الإرسال...' : '✅ تأكيد الطلب وإرساله'}
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
+        </>
+    );
 }
